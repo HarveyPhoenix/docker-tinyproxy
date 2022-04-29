@@ -170,6 +170,12 @@ addRouteRule() {
     ip route add default via 10.16.1.1 dev tun0 table vpn
     ip rule add from 10.16.1.2/32 table vpn
 }
+
+editDNS() {
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+    ip route add 8.8.8.8/32 via 10.16.1.1 dev tun0
+}
+
 startopenvpn() {
     screenOut "Start Openvpn"
     mkdir -p /dev/net
@@ -181,6 +187,7 @@ startopenvpn() {
         screenOut "Start Openvpn server"
         openvpn $OPENVPN/client.conf &
         addRouteRule
+        editDNS
     fi
 }
 
