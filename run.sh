@@ -90,6 +90,10 @@ enableLogFile() {
 	sed -i -e"s,^#LogFile,LogFile," $PROXY_CONF
 }
 
+enableOpenVpn() {
+	sed -i -e"s,^#Bind 192.168.0.1,Bind 10.16.1.2," $PROXY_CONF
+}
+
 setAccess() {
     if [[ "$1" == *ANY* ]]; then
         sed -i -e"s/^Allow /#Allow /" $PROXY_CONF
@@ -160,6 +164,26 @@ tailLog() {
                    "Stopped tailing $TAIL_LOG"
 }
 
+addRouteRule() {
+    sleep 10
+    echo "201 vpn" >> /etc/iproute2/rt_tables
+    ip route add default via 10.16.1.1 dev tun0 table vpn
+    ip rule add from 10.16.1.2/32 table vpn
+}
+startopenvpn() {
+    screenOut "Start Openvpn"
+    mkdir -p /dev/net
+    if [ ! -c /dev/net/tun ]; then
+            mknod /dev/net/tun c 10 200
+    fi
+    if [ -r "$OPENVPN/client.conf" ]; then
+        enableOpenVpn
+        screenOut "Start Openvpn server"
+        openvpn $OPENVPN/client.conf &
+        addRouteRule
+    fi
+}
+
 # Check args
 if [ "$#" -lt 1 ]; then
     displayUsage
@@ -181,6 +205,8 @@ setFilter
 setTimeout
 # Enable log to file
 enableLogFile
+# openvpn
+startopenvpn
 # Start Tinyproxy
 startService
 # Tail Tinyproxy log

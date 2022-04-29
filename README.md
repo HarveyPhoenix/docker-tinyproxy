@@ -42,3 +42,29 @@ Any Tinyproxy filter setting such as FilterDefaultDeny can be set as an environm
 ### Contribute
 ---
 As always, contributions are appriciated. Simply open a Pull request.
+
+### OpenVpn Feat
+
+#### config
+
+openvpn config must not use the redirect route
+
+can add follow cmd into .ovpn file to avoid redirect mode
+```
+route-nopull
+```
+
+
+#### run
+
+```
+docker run -d --name='tinyproxy' -p 0.0.0.0:8888:8888 --dns=8.8.8.8 -v /home/xxx/xxx.ovpn:/etc/openvpn/client.conf --cap-add=NET_ADMIN --network=brvpn openvpn-tinyproxy:latest ANY
+```
+
+### TODO
+
+fixed the hardcode
+```
+gateway 10.16.1.1
+vpnclient ip 10.16.1.2
+```
